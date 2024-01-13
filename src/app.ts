@@ -3,6 +3,12 @@ env.config();
 import express, { Express } from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
+import authRoute from "./routes/auth_route";
+import userRoute from "./routes/user_route";
+import reviewRoute from "./routes/review_route";
+import postRoute from "./routes/post_route";
+import commentRoute from "./routes/comment_route";
+import watchlistRoute from "./routes/watchlist_route";
 
 const initApp = (): Promise<Express> => {
   const promise = new Promise<Express>((resolve) => {
@@ -14,8 +20,16 @@ const initApp = (): Promise<Express> => {
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
-      // app.use("/student", studentRoute);
-      // app.use("/studentpost", studentPostRoute);
+      app.post("/register", authRoute);
+      app.post("/login", authRoute);
+      app.get("/users", userRoute);
+      app.get("/refresh", authRoute);
+      app.get("/logout", authRoute);
+      app.get("/reviews", reviewRoute);
+      app.get("/posts", postRoute);
+      app.get("/comments", commentRoute);
+      app.get("/watchlists", watchlistRoute);
+
       // app.use("/auth", authRoute);
       resolve(app);
     });
