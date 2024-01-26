@@ -1,20 +1,21 @@
 import mongoose from "mongoose";
 
 export interface IUser {
-  firstname: string;
-  lastname: string;
+  _id?: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   refreshTokens?: string[];
-  profilePicture?: Buffer;
+  imgUrl: String;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
-  firstname: {
+  firstName: {
     type: String,
     required: true,
   },
-  lastname: {
+  lastName: {
     type: String,
     required: true,
   },
@@ -30,10 +31,10 @@ const userSchema = new mongoose.Schema<IUser>({
     type: [String],
     required: false,
   },
-  profilePicture: {
-    type: Buffer,
-    required: false, //Need to be set to true
-  }
+  imgUrl: {
+    type: String,
+    required: true,
+  },
 });
 
 export default mongoose.model<IUser>("User", userSchema);

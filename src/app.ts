@@ -8,7 +8,9 @@ import userRoute from "./routes/user_route";
 import reviewRoute from "./routes/review_route";
 import postRoute from "./routes/post_route";
 import commentRoute from "./routes/comment_route";
+import movieRoute from "./routes/movie_route";
 import watchlistRoute from "./routes/watchlist_route";
+import fileRoute from "./routes/file_route";
 
 const initApp = (): Promise<Express> => {
   const promise = new Promise<Express>((resolve) => {
@@ -20,15 +22,21 @@ const initApp = (): Promise<Express> => {
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
-      app.post("/register", authRoute);
-      app.post("/login", authRoute);
+      app.use((_req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Methods", "*");
+        res.header("Access-Control-Allow-Headers", "*");
+        next();
+      });
+      app.use("/auth", authRoute);
       app.get("/users", userRoute);
-      app.get("/refresh", authRoute);
-      app.get("/logout", authRoute);
       app.get("/reviews", reviewRoute);
       app.get("/posts", postRoute);
       app.get("/comments", commentRoute);
+      app.use("/movies", movieRoute);
       app.get("/watchlists", watchlistRoute);
+      app.use("/public", express.static("public"));
+      app.use("/file", fileRoute);
 
       // app.use("/auth", authRoute);
       resolve(app);
