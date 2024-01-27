@@ -5,32 +5,36 @@ import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import { Document } from "mongoose";
 
-const client = new OAuth2Client();
+const client = new OAuth2Client({
+  clientId: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  redirectUri: process.env.GOOGLE_REDIRECT_URI,
+});
 const googleSignin = async (req: Request, res: Response) => {
   console.log(req.body);
   try {
-    const ticket = await client.verifyIdToken({
-      idToken: req.body.credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
+    const { tokens } = await client.getToken({
+      code: req.body.code,
     });
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+    });
+
     const payload = ticket.getPayload();
     const email = payload?.email;
-    const firstName = payload?.given_name;
-    const lastName = payload?.family_name;
+    const fullName = payload?.name;
     if (email != null) {
       let user = await User.findOne({ email: email });
       if (user == null) {
         user = await User.create({
-          firstName,
-          lastName,
+          fullName,
           email,
           imgUrl: payload?.picture,
         });
       }
       const tokens = await generateTokens(user);
       res.status(200).send({
-        firstName: user.firstName,
-        lastName: user.lastName,
+        fullName: user.fullName,
         email: user.email,
         _id: user._id,
         imgUrl: user.imgUrl,
@@ -38,13 +42,13 @@ const googleSignin = async (req: Request, res: Response) => {
       });
     }
   } catch (err) {
+    console.log(err);
     return res.status(400).send(err.message);
   }
 };
 
 const register = async (req: Request, res: Response) => {
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
+  const fullName = req.body.fullName;
   const email = req.body.email;
   const password = req.body.password;
   const imgUrl = req.body.imgUrl;
@@ -59,16 +63,14 @@ const register = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(password, salt);
     const rs2 = await User.create({
-      firstName,
-      lastName,
+      fullName,
       email,
       password: encryptedPassword,
       imgUrl: imgUrl,
     });
     const tokens = await generateTokens(rs2);
     res.status(201).send({
-      firstname: rs2.firstName,
-      lastName: rs2.lastName,
+      fullName: rs2.fullName,
       email: rs2.email,
       _id: rs2._id,
       imgUrl: rs2.imgUrl,
