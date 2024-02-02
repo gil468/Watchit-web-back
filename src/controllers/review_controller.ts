@@ -18,6 +18,21 @@ class ReviewController extends BaseController<IReview> {
     super.getById(req, res);
   }
 
+  async getByUserId(req: AuthRequest, res: Response) {
+    console.log("Get Review by User Id:" + req.params.id);
+    const owner = req.user._id;
+    try {
+      const review = await Review.findOne({ _id: owner });
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      res.status(201).send(review);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+
   async post(req: AuthRequest, res: Response) {
     console.log("Post Review: " + req.body);
     const _id = req.user._id;

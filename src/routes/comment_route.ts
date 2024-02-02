@@ -7,6 +7,9 @@ router.get("/", CommentController.get.bind(CommentController));
 
 router.get("/:id", CommentController.getById.bind(CommentController));
 
+//To do getCommentsByReviewId
+router.get("/review/:id", CommentController.getById.bind(CommentController));
+
 router.post(
   "/",
   authMiddleware,
@@ -16,13 +19,13 @@ router.post(
 router.put(
   "/:id",
   authMiddleware,
-  CommentController.putById.bind(CommentController)
+  CommentController.putCommentById.bind(CommentController)
 );
 
 router.delete(
   "/:id",
   authMiddleware,
-  CommentController.deleteById.bind(CommentController)
+  CommentController.deleteCommentById.bind(CommentController)
 );
 
 export default router;

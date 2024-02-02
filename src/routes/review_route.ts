@@ -7,6 +7,8 @@ router.get("/", ReviewController.get.bind(ReviewController));
 
 router.get("/:id", ReviewController.getById.bind(ReviewController));
 
+router.get("/user/:id", ReviewController.getByUserId.bind(ReviewController));
+
 router.post("/", authMiddleware, ReviewController.post.bind(ReviewController));
 
 router.put(

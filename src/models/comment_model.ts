@@ -4,7 +4,7 @@ export interface IComment {
   _id?: string;
   description: string;
   owner: string;
-  reviewId: number;
+  reviewId: string;
   timeStamp: Date;
   userFullName: string;
   userImgUrl: string;
@@ -20,7 +20,7 @@ const commentSchema = new mongoose.Schema<IComment>({
     required: true,
   },
   reviewId: {
-    type: Number,
+    type: String,
     required: true,
   },
   timeStamp: {

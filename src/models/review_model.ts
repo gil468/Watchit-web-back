@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import { IComment } from "./comment_model";
 
 export interface IReview {
+  _id?: string;
   movieTitle: string;
   description: string;
   score: number;
   reviewImgUrl: string;
-  timestamp: Date;
+  timeStamp: Date;
   owner: string;
   userFullName: string;
   userImgUrl: string;
@@ -33,7 +34,7 @@ const reviewSchema = new mongoose.Schema<IReview>({
     type: String,
     required: true,
   },
-  timestamp: {
+  timeStamp: {
     type: Date,
     required: true,
   },
