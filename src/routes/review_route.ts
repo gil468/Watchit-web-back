@@ -3,24 +3,20 @@ const router = express.Router();
 import ReviewController from "../controllers/review_controller";
 import authMiddleware from "../common/auth_middleware";
 
-router.get("/reviews", ReviewController.get.bind(ReviewController));
+router.get("/", ReviewController.get.bind(ReviewController));
 
-router.get("/review:id", ReviewController.getById.bind(ReviewController));
+router.get("/:id", ReviewController.getById.bind(ReviewController));
 
-router.post(
-  "/review",
-  authMiddleware,
-  ReviewController.post.bind(ReviewController)
-);
+router.post("/", authMiddleware, ReviewController.post.bind(ReviewController));
 
 router.put(
-  "/review:id",
+  "/:id",
   authMiddleware,
   ReviewController.putById.bind(ReviewController)
 );
 
 router.delete(
-  "/review:id",
+  "/:id",
   authMiddleware,
   ReviewController.deleteById.bind(ReviewController)
 );

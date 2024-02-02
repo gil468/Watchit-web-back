@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 
 export class BaseController<ModelType> {
   model: Model<ModelType>;

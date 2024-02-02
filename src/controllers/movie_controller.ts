@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
 import { Response } from "express";
-import { AuthResquest } from "../common/auth_middleware";
+import { AuthRequest } from "../common/auth_middleware";
 
 class MovieController {
-  async search(req: AuthResquest, res: Response) {
+  async search(req: AuthRequest, res: Response) {
     const searchTerm = req.params.search;
 
     try {
@@ -21,7 +21,7 @@ class MovieController {
     }
   }
 
-  async getById(req: AuthResquest, res: Response) {
+  async getById(req: AuthRequest, res: Response) {
     const searchTerm = req.params.search;
 
     try {

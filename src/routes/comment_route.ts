@@ -5,22 +5,22 @@ import authMiddleware from "../common/auth_middleware";
 
 router.get("/", CommentController.get.bind(CommentController));
 
-router.get("/comment:id", CommentController.getById.bind(CommentController));
+router.get("/:id", CommentController.getById.bind(CommentController));
 
 router.post(
-  "/comment",
+  "/",
   authMiddleware,
-  CommentController.post.bind(CommentController)
+  CommentController.postComment.bind(CommentController)
 );
 
 router.put(
-  "/comment:id",
+  "/:id",
   authMiddleware,
   CommentController.putById.bind(CommentController)
 );
 
 router.delete(
-  "/comment:id",
+  "/:id",
   authMiddleware,
   CommentController.deleteById.bind(CommentController)
 );
