@@ -3,7 +3,7 @@ const router = express.Router();
 import CommentController from "../controllers/comment_controller";
 import authMiddleware from "../common/auth_middleware";
 
-router.get("/comments", CommentController.get.bind(CommentController));
+router.get("/", CommentController.get.bind(CommentController));
 
 router.get("/comment:id", CommentController.getById.bind(CommentController));
 

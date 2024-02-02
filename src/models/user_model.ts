@@ -6,7 +6,7 @@ export interface IUser {
   email: string;
   password?: string;
   refreshTokens?: string[];
-  imgUrl: String;
+  imgUrl: string;
 }
 
 const userSchema = new mongoose.Schema<IUser>({

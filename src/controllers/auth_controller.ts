@@ -52,6 +52,10 @@ const register = async (req: Request, res: Response) => {
   const email = req.body.email;
   const password = req.body.password;
   const imgUrl = req.body.imgUrl;
+  const refreshTokenExpiration = parseInt(
+    process.env.JWT_REFRESH_TOKEN_EXPIRATION,
+    10
+  );
   if (!email || !password) {
     return res.status(400).send("missing email or password");
   }
@@ -69,12 +73,17 @@ const register = async (req: Request, res: Response) => {
       imgUrl: imgUrl,
     });
     const tokens = await generateTokens(rs2);
-    res.status(201).send({
+    res.cookie("jwt", tokens.refreshToken, {
+      httpOnly: true,
+      maxAge: refreshTokenExpiration,
+    });
+    // res.json({ accessToken: tokens.accessToken });
+    res.status(201).json({
       fullName: rs2.fullName,
       email: rs2.email,
       _id: rs2._id,
       imgUrl: rs2.imgUrl,
-      ...tokens,
+      accessToken: tokens.accessToken,
     });
   } catch (err) {
     return res.status(400).send("error missing email or password");
@@ -104,6 +113,10 @@ const generateTokens = async (user: Document & IUser) => {
 const login = async (req: Request, res: Response) => {
   const email = req.body.email;
   const password = req.body.password;
+  const refreshTokenExpiration = parseInt(
+    process.env.JWT_REFRESH_TOKEN_EXPIRATION,
+    10
+  );
   if (!email || !password) {
     return res.status(400).send("missing email or password");
   }
@@ -118,16 +131,23 @@ const login = async (req: Request, res: Response) => {
     }
 
     const tokens = await generateTokens(user);
-    return res.status(200).send(tokens);
+    res.cookie("jwt", tokens.refreshToken, {
+      httpOnly: true,
+      maxAge: refreshTokenExpiration,
+    });
+    res.json({ accessToken: tokens.accessToken });
+    return res.status(200);
   } catch (err) {
     return res.status(400).send("error missing email or password");
   }
 };
 
 const logout = async (req: Request, res: Response) => {
-  const authHeader = req.headers["authorization"];
-  const refreshToken = authHeader && authHeader.split(" ")[1]; // Bearer <token>
-  if (refreshToken == null) return res.sendStatus(401);
+  const cookies = req.cookies;
+  if (!cookies?.jwt) {
+    return res.status(401);
+  }
+  const refreshToken = req.cookies.jwt;  if (refreshToken == null) return res.sendStatus(401);
   jwt.verify(
     refreshToken,
     process.env.JWT_REFRESH_SECRET,
@@ -158,9 +178,16 @@ const logout = async (req: Request, res: Response) => {
 };
 
 const refresh = async (req: Request, res: Response) => {
-  const authHeader = req.headers["authorization"];
-  const refreshToken = authHeader && authHeader.split(" ")[1]; // Bearer <token>
-  if (refreshToken == null) return res.sendStatus(401);
+  const cookies = req.cookies;
+  if (!cookies?.jwt) {
+    return res.status(401);
+  }
+  const refreshToken = req.cookies.jwt;
+  const refreshTokenExpiration = parseInt(
+    process.env.JWT_REFRESH_TOKEN_EXPIRATION,
+    10
+  );
+  if (!refreshToken) return res.sendStatus(401);
   jwt.verify(
     refreshToken,
     process.env.JWT_REFRESH_SECRET,
@@ -193,10 +220,12 @@ const refresh = async (req: Request, res: Response) => {
         );
         userDb.refreshTokens.push(newRefreshToken);
         await userDb.save();
-        return res.status(200).send({
-          accessToken: accessToken,
-          refreshToken: newRefreshToken,
+        res.cookie("jwt", newRefreshToken, {
+          httpOnly: true,
+          maxAge: refreshTokenExpiration,
         });
+        res.json({ accessToken: accessToken });
+        return res.status(200);
       } catch (err) {
         res.sendStatus(401).send(err.message);
       }

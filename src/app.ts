@@ -2,6 +2,7 @@ import env from "dotenv";
 env.config();
 import express, { Express } from "express";
 import mongoose from "mongoose";
+import cookieParser from "cookie-parser"
 import bodyParser from "body-parser";
 import authRoute from "./routes/auth_route";
 import userRoute from "./routes/user_route";
@@ -28,6 +29,7 @@ const initApp = (): Promise<Express> => {
         res.header("Access-Control-Allow-Headers", "*");
         next();
       });
+      app.use(cookieParser());
       app.use("/auth", authRoute);
       app.get("/users", userRoute);
       app.get("/reviews", reviewRoute);
