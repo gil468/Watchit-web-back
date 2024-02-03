@@ -29,9 +29,9 @@ const initApp = (): Promise<Express> => {
       });
       app.use(cookieParser());
       app.use("/auth", authRoute);
-      app.get("/users", userRoute);
-      app.get("/reviews", reviewRoute);
-      app.get("/comments", commentRoute);
+      app.use("/users", userRoute);
+      app.use("/reviews", reviewRoute);
+      app.use("/comments", commentRoute);
       app.use("/movies", movieRoute);
       app.use("/public", express.static("public"));
       app.use("/file", fileRoute);

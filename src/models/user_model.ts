@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 export interface IUser {
-  _id?: string;
+  _id?: ObjectId;
   fullName: string;
   email: string;
   password?: string;

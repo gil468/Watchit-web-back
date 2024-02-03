@@ -10,8 +10,9 @@ const authMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+  // const authHeader = req.headers["authorization"];
+  // const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+  const token = req.cookies.jwt;
   if (token == null) return res.sendStatus(401);
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     console.log(err);

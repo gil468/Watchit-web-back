@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId }  from "mongoose";
 
 export interface IComment {
-  _id?: string;
+  _id?: ObjectId;
   description: string;
   owner: string;
   reviewId: string;

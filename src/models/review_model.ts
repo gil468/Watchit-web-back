@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { IComment } from "./comment_model";
 
 export interface IReview {
-  _id?: string;
+  _id?: ObjectId;
   movieTitle: string;
   description: string;
   score: number;
