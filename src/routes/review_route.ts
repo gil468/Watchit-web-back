@@ -3,7 +3,7 @@ const router = express.Router();
 import ReviewController from "../controllers/review_controller";
 import authMiddleware from "../common/auth_middleware";
 
-router.get("/", ReviewController.get.bind(ReviewController));
+router.get("/", authMiddleware, ReviewController.get.bind(ReviewController));
 
 router.get("/:id", ReviewController.getById.bind(ReviewController));
 

@@ -1,13 +1,11 @@
-import mongoose, { ObjectId }  from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 export interface IComment {
   _id?: ObjectId;
   description: string;
-  owner: string;
-  reviewId: string;
+  authorId: ObjectId;
+  reviewId: ObjectId;
   timeStamp: Date;
-  userFullName: string;
-  userImgUrl: string;
 }
 
 const commentSchema = new mongoose.Schema<IComment>({
@@ -15,24 +13,18 @@ const commentSchema = new mongoose.Schema<IComment>({
     type: String,
     required: true,
   },
-  owner: {
-    type: String,
+  authorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
   reviewId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Review",
     required: true,
   },
   timeStamp: {
     type: Date,
-    required: true,
-  },
-  userFullName: {
-    type: String,
-    required: true,
-  },
-  userImgUrl: {
-    type: String,
     required: true,
   },
 });

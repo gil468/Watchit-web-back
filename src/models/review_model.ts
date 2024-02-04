@@ -1,5 +1,4 @@
 import mongoose, { ObjectId } from "mongoose";
-import { IComment } from "./comment_model";
 
 export interface IReview {
   _id?: ObjectId;
@@ -7,14 +6,11 @@ export interface IReview {
   description: string;
   score: number;
   reviewImgUrl: string;
+  author: ObjectId;
   timeStamp: Date;
-  owner: string;
-  userFullName: string;
-  userImgUrl: string;
-  commentsCount: number;
-  likesCount: number;
-  isLiked: object[];
-  comments?: IComment[];
+  likes: string[];
+  isLiked?: boolean;
+  likesCount?: number;
 }
 
 const reviewSchema = new mongoose.Schema<IReview>({
@@ -34,37 +30,18 @@ const reviewSchema = new mongoose.Schema<IReview>({
     type: String,
     required: true,
   },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   timeStamp: {
     type: Date,
     required: true,
   },
-  owner: {
-    type: String,
+  likes: {
+    type: [String],
     required: true,
-  },
-  userFullName: {
-    type: String,
-    required: true,
-  },
-  userImgUrl: {
-    type: String,
-    required: true,
-  },
-  commentsCount: {
-    type: Number,
-    required: true,
-  },
-  likesCount: {
-    type: Number,
-    required: true,
-  },
-  isLiked: {
-    type: [Object],
-    required: true,
-  },
-  comments: {
-    type: [Object],
-    required: false,
   },
 });
 

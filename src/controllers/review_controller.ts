@@ -10,7 +10,19 @@ class ReviewController extends BaseController<IReview> {
 
   async get(req: AuthRequest, res: Response) {
     console.log("Get all Reviews: ");
-    super.get(req, res);
+    try {
+      const reviews = await Review.find()
+        .select("movieTitle description reviewImgUrl score timeStamp likes")
+        .populate("author", "fullName imgUrl");
+      const detailedReviews = reviews.map((review) => ({
+        ...review.toObject(),
+        isLiked: review.likes.includes(req.user._id),
+        likesCount: review.likes.length,
+      }));
+      res.send(detailedReviews);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
 
   async getById(req: AuthRequest, res: Response) {
@@ -36,7 +48,10 @@ class ReviewController extends BaseController<IReview> {
   async post(req: AuthRequest, res: Response) {
     console.log("Post Review: " + req.body);
     const _id = req.user._id;
-    req.body.userId = _id;
+    req.body.author = _id;
+    req.body.timeStamp = new Date();
+    req.body.likes = [];
+
     super.post(req, res);
   }
 

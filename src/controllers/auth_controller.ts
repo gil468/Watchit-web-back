@@ -173,17 +173,7 @@ const logout = async (req: Request, res: Response) => {
 };
 
 const refresh = async (req: Request, res: Response) => {
-  const cookies = req.cookies;
-  console.log(cookies);
-  if (!cookies?.refresh) {
-    console.log("no refresh token");
-    return res.sendStatus(401);
-  }
   const refreshToken = req.cookies.refresh;
-  const refreshTokenExpiration = parseInt(
-    process.env.JWT_REFRESH_TOKEN_EXPIRATION,
-    10
-  );
   if (!refreshToken) return res.sendStatus(401);
   jwt.verify(
     refreshToken,
