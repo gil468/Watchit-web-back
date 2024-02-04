@@ -221,11 +221,10 @@ const refresh = async (req: Request, res: Response) => {
         res.cookie("refresh", newRefreshToken, {
           httpOnly: true,
           path: "/auth",
-          maxAge: 2 * 60 * 60 * 1000,
         });
-        res.cookie("jwt", accessToken, {
+        res.cookie("access", accessToken, {
           httpOnly: true,
-          maxAge: 2 * 60 * 60 * 1000,
+          maxAge: refreshTokenExpiration,
         });
         return res.sendStatus(200);
       } catch (err) {
