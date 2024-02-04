@@ -10,8 +10,10 @@ const client = new OAuth2Client({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   redirectUri: process.env.GOOGLE_REDIRECT_URI,
 });
+
+const refreshTokenExpiration = parseInt(process.env.JWT_EXPIRATION_MILL);
+
 const googleSignin = async (req: Request, res: Response) => {
-  console.log(req.body);
   try {
     const { tokens } = await client.getToken({
       code: req.body.code,
@@ -32,30 +34,29 @@ const googleSignin = async (req: Request, res: Response) => {
           imgUrl: payload?.picture,
         });
       }
+
       const tokens = await generateTokens(user);
-      res.status(200).send({
-        fullName: user.fullName,
-        email: user.email,
-        _id: user._id,
-        imgUrl: user.imgUrl,
-        ...tokens,
+      res.cookie("refresh", tokens.refreshToken, {
+        httpOnly: true,
+        path: "/auth",
       });
+      res.cookie("access", tokens.accessToken, {
+        httpOnly: true,
+        maxAge: refreshTokenExpiration,
+      });
+      return res.sendStatus(200);
     }
+    return res.status(400).send("error fetching user data from google");
   } catch (err) {
-    console.log(err);
     return res.status(400).send(err.message);
   }
 };
 
 const register = async (req: Request, res: Response) => {
-  const fullName = req.body.fullName;
-  const email = req.body.email;
-  const password = req.body.password;
-  const imgUrl = req.body.imgUrl;
-  const refreshTokenExpiration = parseInt(
-    process.env.JWT_REFRESH_TOKEN_EXPIRATION,
-    10
-  );
+  const fullName: string = req.body.fullName;
+  const email: string = req.body.email;
+  const password: string = req.body.password;
+  const imgUrl: string = req.body.imgUrl;
   if (!email || !password) {
     return res.status(400).send("missing email or password");
   }
@@ -66,25 +67,22 @@ const register = async (req: Request, res: Response) => {
     }
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(password, salt);
-    const rs2 = await User.create({
+    const user = await User.create({
       fullName,
       email,
       password: encryptedPassword,
       imgUrl: imgUrl,
     });
-    const tokens = await generateTokens(rs2);
-    res.cookie("jwt", tokens.refreshToken, {
+    const tokens = await generateTokens(user);
+    res.cookie("refresh", tokens.refreshToken, {
+      httpOnly: true,
+      path: "/auth",
+    });
+    res.cookie("access", tokens.accessToken, {
       httpOnly: true,
       maxAge: refreshTokenExpiration,
     });
-    // res.json({ accessToken: tokens.accessToken });
-    res.status(201).json({
-      fullName: rs2.fullName,
-      email: rs2.email,
-      _id: rs2._id,
-      imgUrl: rs2.imgUrl,
-      accessToken: tokens.accessToken,
-    });
+    return res.sendStatus(200);
   } catch (err) {
     return res.status(400).send("error missing email or password");
   }
@@ -111,12 +109,9 @@ const generateTokens = async (user: Document & IUser) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const refreshTokenExpiration = parseInt(
-    process.env.JWT_REFRESH_TOKEN_EXPIRATION,
-    10
-  );
+  const email: string = req.body.email;
+  const password: string = req.body.password;
+
   if (!email || !password) {
     return res.status(400).send("missing email or password");
   }
@@ -131,23 +126,23 @@ const login = async (req: Request, res: Response) => {
     }
 
     const tokens = await generateTokens(user);
-    res.cookie("jwt", tokens.refreshToken, {
+    res.cookie("refresh", tokens.refreshToken, {
+      httpOnly: true,
+      path: "/auth",
+    });
+    res.cookie("access", tokens.accessToken, {
       httpOnly: true,
       maxAge: refreshTokenExpiration,
     });
-    res.json({ accessToken: tokens.accessToken });
-    return res.status(200);
+    return res.sendStatus(200);
   } catch (err) {
     return res.status(400).send("error missing email or password");
   }
 };
 
 const logout = async (req: Request, res: Response) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) {
-    return res.status(401);
-  }
-  const refreshToken = req.cookies.jwt;  if (refreshToken == null) return res.sendStatus(401);
+  const refreshToken = req.cookies.refresh;
+  if (!refreshToken) return res.sendStatus(401);
   jwt.verify(
     refreshToken,
     process.env.JWT_REFRESH_SECRET,
@@ -179,10 +174,12 @@ const logout = async (req: Request, res: Response) => {
 
 const refresh = async (req: Request, res: Response) => {
   const cookies = req.cookies;
-  if (!cookies?.jwt) {
-    return res.status(401);
+  console.log(cookies);
+  if (!cookies?.refresh) {
+    console.log("no refresh token");
+    return res.sendStatus(401);
   }
-  const refreshToken = req.cookies.jwt;
+  const refreshToken = req.cookies.refresh;
   const refreshTokenExpiration = parseInt(
     process.env.JWT_REFRESH_TOKEN_EXPIRATION,
     10
@@ -220,12 +217,17 @@ const refresh = async (req: Request, res: Response) => {
         );
         userDb.refreshTokens.push(newRefreshToken);
         await userDb.save();
-        res.cookie("jwt", newRefreshToken, {
+
+        res.cookie("refresh", newRefreshToken, {
           httpOnly: true,
-          maxAge: refreshTokenExpiration,
+          path: "/auth",
+          maxAge: 2 * 60 * 60 * 1000,
         });
-        res.json({ accessToken: accessToken });
-        return res.status(200);
+        res.cookie("jwt", accessToken, {
+          httpOnly: true,
+          maxAge: 2 * 60 * 60 * 1000,
+        });
+        return res.sendStatus(200);
       } catch (err) {
         res.sendStatus(401).send(err.message);
       }

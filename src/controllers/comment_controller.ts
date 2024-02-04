@@ -55,7 +55,7 @@ class CommentController extends BaseController<IComment> {
     console.log("Post Comment: " + req.body);
     const { reviewId, description, userFullName, userImgUrl } = req.body;
     const owner = req.params.owner;
-    
+
     try {
       const review = await Review.findOne({ _id: reviewId });
       if (!review) {
@@ -69,7 +69,7 @@ class CommentController extends BaseController<IComment> {
         userFullName,
         userImgUrl,
       });
-      review.comments.push(newComment);
+      //review.comments.push(newComment);
       await review.save();
       res.status(201).json({ message: "Comment added successfully", review });
       next();
@@ -124,7 +124,7 @@ class CommentController extends BaseController<IComment> {
   // }
 
   // async deleteCommentById(req: AuthRequest, res: Response) {
-  //   const commentId = req.params.id; 
+  //   const commentId = req.params.id;
   //   const reviewId = req.body.reviewId;
 
   //   try {

@@ -2,7 +2,7 @@ import env from "dotenv";
 env.config();
 import express, { Express } from "express";
 import mongoose from "mongoose";
-import cookieParser from "cookie-parser"
+import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import authRoute from "./routes/auth_route";
 import userRoute from "./routes/user_route";
@@ -10,6 +10,7 @@ import reviewRoute from "./routes/review_route";
 import commentRoute from "./routes/comment_route";
 import movieRoute from "./routes/movie_route";
 import fileRoute from "./routes/file_route";
+var cors = require("cors");
 
 const initApp = (): Promise<Express> => {
   const promise = new Promise<Express>((resolve) => {
@@ -21,12 +22,11 @@ const initApp = (): Promise<Express> => {
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
-      app.use((_req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Methods", "*");
-        res.header("Access-Control-Allow-Headers", "*");
-        next();
-      });
+      const corsOptions = {
+        origin: "http://localhost:5173",
+        credentials: true,
+      };
+      app.use(cors(corsOptions));
       app.use(cookieParser());
       app.use("/auth", authRoute);
       app.use("/users", userRoute);
@@ -36,7 +36,6 @@ const initApp = (): Promise<Express> => {
       app.use("/public", express.static("public"));
       app.use("/file", fileRoute);
 
-      // app.use("/auth", authRoute);
       resolve(app);
     });
   });
