@@ -3,7 +3,7 @@ import mongoose, { ObjectId } from "mongoose";
 export interface IComment {
   _id?: ObjectId;
   description: string;
-  authorId: ObjectId;
+  author: ObjectId;
   reviewId: ObjectId;
   timeStamp: Date;
 }
@@ -13,7 +13,7 @@ const commentSchema = new mongoose.Schema<IComment>({
     type: String,
     required: true,
   },
-  authorId: {
+  author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
@@ -25,6 +25,7 @@ const commentSchema = new mongoose.Schema<IComment>({
   },
   timeStamp: {
     type: Date,
+    default: Date.now,
     required: true,
   },
 });

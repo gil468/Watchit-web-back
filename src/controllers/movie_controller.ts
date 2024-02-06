@@ -22,11 +22,11 @@ class MovieController {
   }
 
   async getById(req: AuthRequest, res: Response) {
-    const searchTerm = req.params.search;
+    const movieId = req.params.movieId;
 
     try {
       const response = await fetch(
-        `https://api.themoviedb.org/3/search/movie?query=${searchTerm}`,
+        `https://api.themoviedb.org/3/movie/${movieId}`,
         {
           headers: { Authorization: `Bearer ${process.env.MOVIE_API_APP_KEY}` },
         }

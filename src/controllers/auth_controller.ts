@@ -163,6 +163,8 @@ const logout = async (req: Request, res: Response) => {
             (t) => t !== refreshToken
           );
           await userDb.save();
+          res.clearCookie("refresh", { path: "/auth" });
+          res.clearCookie("access");
           return res.sendStatus(200);
         }
       } catch (err) {
@@ -218,7 +220,7 @@ const refresh = async (req: Request, res: Response) => {
         });
         return res.sendStatus(200);
       } catch (err) {
-        res.sendStatus(401).send(err.message);
+        res.status(401).send(err.message);
       }
     }
   );

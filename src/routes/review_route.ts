@@ -5,9 +5,29 @@ import authMiddleware from "../common/auth_middleware";
 
 router.get("/", authMiddleware, ReviewController.get.bind(ReviewController));
 
-router.get("/:id", ReviewController.getById.bind(ReviewController));
+router.get(
+  "/connectedUser",
+  authMiddleware,
+  ReviewController.getByConnectedUser.bind(ReviewController)
+);
 
-router.get("/user/:id", ReviewController.getByUserId.bind(ReviewController));
+router.get(
+  "/id/:id",
+  authMiddleware,
+  ReviewController.getById.bind(ReviewController)
+);
+
+router.get(
+  "/like/:id",
+  authMiddleware,
+  ReviewController.like.bind(ReviewController)
+);
+
+router.get(
+  "/unlike/:id",
+  authMiddleware,
+  ReviewController.unlike.bind(ReviewController)
+);
 
 router.post("/", authMiddleware, ReviewController.post.bind(ReviewController));
 

@@ -8,9 +8,20 @@ class UserController extends BaseController<IUser> {
     super(User);
   }
 
-  async get(req: AuthRequest, res: Response) {
-    console.log("Get all Users: ");
-    super.get(req, res);
+  async getConnected(req: AuthRequest, res: Response) {
+    console.log("Get Connected User: ");
+    const id = req.user._id;
+
+    try {
+      const user = await User.findById(id).select([
+        "fullName",
+        "email",
+        "imgUrl",
+      ]);
+      res.send(user);
+    } catch (err) {
+      res.status(500).json({ message: "unable to retrieve user data" });
+    }
   }
 
   async getById(req: AuthRequest, res: Response) {
@@ -26,13 +37,15 @@ class UserController extends BaseController<IUser> {
   }
 
   async putById(req: AuthRequest, res: Response) {
-    console.log("Put User by Id:" + req.params.id);
-    super.putById(req, res);
-  }
+    console.log("Put User");
+    const id = req.user._id;
 
-  async deleteById(req: AuthRequest, res: Response) {
-    console.log("Delete User by Id:" + req.params.id);
-    super.deleteById(req, res);
+    try {
+      const obj = await this.model.findByIdAndUpdate(id, req.body);
+      res.status(200).send(obj);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
 }
 

@@ -10,7 +10,7 @@ router.get(
 );
 
 router.get(
-  "/:id",
+  "/:movieId",
   authMiddleware,
   MovieController.getById.bind(MovieController)
 );
