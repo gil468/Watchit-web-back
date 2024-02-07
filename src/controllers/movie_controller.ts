@@ -8,7 +8,7 @@ class MovieController {
 
     try {
       const response = await fetch(
-        `https://api.themoviedb.org/3/search/movie?query=${searchTerm}`,
+        `${process.env.MOVIE_API_URL}/search/movie?query=${searchTerm}`,
         {
           headers: { Authorization: `Bearer ${process.env.MOVIE_API_APP_KEY}` },
         }
@@ -26,7 +26,7 @@ class MovieController {
 
     try {
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieId}`,
+        `${process.env.MOVIE_API_URL}/movie/${movieId}`,
         {
           headers: { Authorization: `Bearer ${process.env.MOVIE_API_APP_KEY}` },
         }

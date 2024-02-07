@@ -9,31 +9,6 @@ class CommentController extends BaseController<IComment> {
     super(Comment);
   }
 
-  async get(req: AuthRequest, res: Response) {
-    console.log("Get all Comments: ");
-    super.get(req, res);
-  }
-
-  async getById(req: AuthRequest, res: Response) {
-    console.log("Get Comment by Id:" + req.params.id);
-    super.getById(req, res);
-  }
-
-  async getByReviewId(req: AuthRequest, res: Response) {
-    console.log("Get Comments by Review Id:" + req.params.id);
-    const reviewId = req.params.id;
-    try {
-      const comments = await Comment.find({ reviewId: reviewId });
-      if (!comments) {
-        return res.status(404).json({ message: "Comments was not found" });
-      }
-      res.status(201).send(comments);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  }
-
   async post(req: AuthRequest, res: Response) {
     try {
       const userId = req.user._id;
