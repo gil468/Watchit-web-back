@@ -5,7 +5,9 @@
   "main": "app.ts",
   "scripts": {
     "test": "tsc && jest --detectOpenHandles --forceExit",
-    "dev": "nodemon ./src/server.ts"
+    "dev": "nodemon ./src/server.ts",
+    "prod": "tsc -p tsconfig_prod.json && node ./dist/src/server.js",
+    "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json && node ./dist/src/server.js"
   },
   "keywords": [],
   "author": "",
