@@ -11,7 +11,7 @@ const client = new OAuth2Client({
   redirectUri: process.env.GOOGLE_REDIRECT_URI,
 });
 
-const refreshTokenExpiration = parseInt(process.env.JWT_EXPIRATION_MILL);
+const accessTokenExpiration = parseInt(process.env.JWT_EXPIRATION_MILL);
 
 const googleSignin = async (req: Request, res: Response) => {
   try {
@@ -42,7 +42,7 @@ const googleSignin = async (req: Request, res: Response) => {
       });
       res.cookie("access", tokens.accessToken, {
         httpOnly: true,
-        maxAge: refreshTokenExpiration,
+        maxAge: accessTokenExpiration,
       });
       return res.sendStatus(200);
     }
@@ -80,7 +80,7 @@ const register = async (req: Request, res: Response) => {
     });
     res.cookie("access", tokens.accessToken, {
       httpOnly: true,
-      maxAge: refreshTokenExpiration,
+      maxAge: accessTokenExpiration,
     });
     return res.sendStatus(200);
   } catch (err) {
@@ -132,7 +132,7 @@ const login = async (req: Request, res: Response) => {
     });
     res.cookie("access", tokens.accessToken, {
       httpOnly: true,
-      maxAge: refreshTokenExpiration,
+      maxAge: accessTokenExpiration,
     });
     return res.sendStatus(200);
   } catch (err) {
@@ -216,7 +216,7 @@ const refresh = async (req: Request, res: Response) => {
         });
         res.cookie("access", accessToken, {
           httpOnly: true,
-          maxAge: refreshTokenExpiration,
+          maxAge: accessTokenExpiration,
         });
         return res.sendStatus(200);
       } catch (err) {

@@ -17,13 +17,13 @@ const initApp = (): Promise<Express> => {
     const db = mongoose.connection;
     db.once("open", () => console.log("Connected to Database"));
     db.on("error", (error) => console.error(error));
-    const url = process.env.DB_URL;
-    mongoose.connect(url!).then(() => {
+    const dbUrl = process.env.DB_URL;
+    mongoose.connect(dbUrl!).then(() => {
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
       const corsOptions = {
-        origin: "http://localhost:5173",
+        origin: `http://localhost:${process.env.FRONTEND_PORT}`,
         credentials: true,
       };
       app.use(cors(corsOptions));
