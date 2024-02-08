@@ -4,7 +4,9 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
-    "test": "tsc && jest --detectOpenHandles --forceExit",
+    "test": "tsc && jest --detectOpenHandles --coverage --forceExit",
+    "testAuth": "tsc && jest --detectOpenHandles --forceExit ./src/tests/auth.test.ts",
+    "testComment": "tsc && jest --detectOpenHandles --forceExit /Users/gilsegev/Watchit-web-back/src/tests/comment.test.ts",
     "dev": "nodemon ./src/server.ts",
     "prod": "tsc -p tsconfig_prod.json && node ./dist/src/server.js",
     "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json && node ./dist/src/server.js"
@@ -30,6 +32,8 @@
     "mongoose": "^8.0.2",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^2.7.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
