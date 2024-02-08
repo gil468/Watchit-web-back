@@ -8,8 +8,7 @@
     "testAuth": "tsc && jest --detectOpenHandles --forceExit ./src/tests/auth.test.ts",
     "testComment": "tsc && jest --detectOpenHandles --forceExit ./src/tests/comment.test.ts",
     "dev": "nodemon ./src/server.ts",
-    "prod": "tsc -p tsconfig_prod.json && node ./dist/src/server.js",
-    "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json && node ./dist/src/server.js"
+    "prod": "tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production"
   },
   "keywords": [],
   "author": "",
