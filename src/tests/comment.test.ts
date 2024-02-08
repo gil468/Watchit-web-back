@@ -13,7 +13,7 @@ const user: IUser = {
   password: "1234567890",
   imgUrl: "https://www.google.com",
 };
-let accessToken = "";
+let accessTokenCookie = "";
 
 beforeAll(async () => {
   app = await initApp();
@@ -22,8 +22,10 @@ beforeAll(async () => {
   await User.deleteMany({ email: user.email });
   const response = await request(app).post("/auth/register").send(user);
   user._id = response.body._id;
-  const response2 = await request(app).post("/auth/login").send(user);
-  accessToken = response2.body.accessToken;
+  accessTokenCookie = response.headers["set-cookie"][1]
+    .split(",")
+    .map((item) => item.split(";")[0])
+    .join(";");
 });
 
 afterAll(async () => {
@@ -31,37 +33,36 @@ afterAll(async () => {
 });
 
 const review: IReview = {
-    movieTitle: "test movie",
-    description: "test description",
-    score: 4,
-    reviewImgUrl: "https://www.google.com",
-    author: user._id,
-    timeStamp: new Date(),
-    likes: [],
-    comments: [],
-  };
+  movieTitle: "test movie",
+  description: "test description",
+  score: 4,
+  reviewImgUrl: "https://www.google.com",
+  author: user._id,
+  timeStamp: new Date(),
+  likes: [],
+  comments: [],
+};
 
 const comment: IComment = {
-    description: "test description",
-    author: user._id,
-    reviewId: review._id,
-    timeStamp: new Date(),
+  description: "test description",
+  author: user._id,
+  reviewId: review._id,
+  timeStamp: new Date(),
+};
+
+describe("Post comment test", () => {
+  const addComment = async (comment: IComment) => {
+    const response = await request(app)
+      .post("/comments/")
+      .set("Cookie", accessTokenCookie)
+      .send(comment);
+    expect(response.statusCode).toBe(201);
+    expect(response.body.author).toBe(user._id);
+    expect(response.body.description).toBe(comment.description);
+    expect(response.body.reviewId).toBe(review._id);
   };
 
-  describe("Post comment test", () => {
-    const addComment = async (comment: IComment) => {
-      const response = await request(app)
-        .post("/comments/")
-        // .set("Authorization", "JWT " + accessToken)
-        .set('Cookie', [`access=${accessToken}`])
-        .send(comment);
-      expect(response.statusCode).toBe(201);
-      expect(response.body.author).toBe(user._id);
-      expect(response.body.description).toBe(comment.description);
-      expect(response.body.reviewId).toBe(review._id);
-    };
-  
-    test("Post comment test", async () => {
-      await addComment(comment);
-    });
+  test("Post comment test", async () => {
+    await addComment(comment);
   });
+});
