@@ -23,9 +23,7 @@ const initApp = (): Promise<Express> => {
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
       const corsOptions = {
-        origin: `${
-          process.env.NODE_ENV !== "production" ? "http" : "https"
-        }://${process.env.DOMAIN_BASE}:${process.env.FRONTEND_PORT}`,
+        origin: `$http://${process.env.DOMAIN_BASE}:${process.env.FRONTEND_PORT}`,
         credentials: true,
       };
       app.use(cors(corsOptions));
