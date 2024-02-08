@@ -18,6 +18,42 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+/**
+ * @swagger
+ * tags:
+ * name: Files
+ * description: The Files API
+ */
+
+/**
+ * @swagger
+ * /:
+ *   post:
+ *     summary: Upload a file
+ *     tags: [File]
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: file
+ *         type: file
+ *         description: The file to upload.
+ *     responses:
+ *       200:
+ *         description: The file was successfully uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *       400:
+ *         description: No file was provided
+ *       500:
+ *         description: Unexpected error
+ */
+
 router.post("/", upload.single("file"), (req, res) => {
   res.status(200).send({ url: base + (req as any).file.path });
 });
