@@ -26,7 +26,7 @@ const initApp = (): Promise<Express> => {
         origin:
           process.env.NODE_ENV !== "production"
             ? `http://${process.env.DOMAIN_BASE}:${process.env.FRONTEND_PORT}`
-            : `http://${process.env.DOMAIN_BASE}`,
+            : `https://${process.env.DOMAIN_BASE}`,
         credentials: true,
       };
       app.use(cors(corsOptions));
