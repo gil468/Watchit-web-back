@@ -30,6 +30,7 @@ initApp().then((app) => {
       key: fs.readFileSync("./client-key.pem"),
       cert: fs.readFileSync("./client-cert.pem"),
     };
+    console.log("listen on PORT: " + process.env.HTTPS_PORT);
     https.createServer(options, app).listen(process.env.HTTPS_PORT);
   }
 });
