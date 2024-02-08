@@ -38,14 +38,10 @@ const googleSignin = async (req: Request, res: Response) => {
       const tokens = await generateTokens(user);
       res.cookie("refresh", tokens.refreshToken, {
         httpOnly: true,
-        sameSite: "none",
-        secure: true,
         path: "/auth",
       });
       res.cookie("access", tokens.accessToken, {
         httpOnly: true,
-        sameSite: "none",
-        secure: true,
         maxAge: accessTokenExpiration,
       });
       return res.sendStatus(200);
@@ -80,14 +76,10 @@ const register = async (req: Request, res: Response) => {
     const tokens = await generateTokens(user);
     res.cookie("refresh", tokens.refreshToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
       path: "/auth",
     });
     res.cookie("access", tokens.accessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
       maxAge: accessTokenExpiration,
     });
     return res.sendStatus(200);
@@ -136,14 +128,10 @@ const login = async (req: Request, res: Response) => {
     const tokens = await generateTokens(user);
     res.cookie("refresh", tokens.refreshToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
       path: "/auth",
     });
     res.cookie("access", tokens.accessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
       maxAge: accessTokenExpiration,
     });
     return res.sendStatus(200);
@@ -224,14 +212,10 @@ const refresh = async (req: Request, res: Response) => {
 
         res.cookie("refresh", newRefreshToken, {
           httpOnly: true,
-          sameSite: "none",
-          secure: true,
           path: "/auth",
         });
         res.cookie("access", accessToken, {
           httpOnly: true,
-          sameSite: "none",
-          secure: true,
           maxAge: accessTokenExpiration,
         });
         return res.sendStatus(200);
