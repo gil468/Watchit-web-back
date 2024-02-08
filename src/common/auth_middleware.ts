@@ -10,6 +10,7 @@ const authMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
+  console.log("auth middleware", req.cookies);
   const token = req.cookies.access;
   if (token == null) return res.sendStatus(401);
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
