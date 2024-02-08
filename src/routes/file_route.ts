@@ -21,8 +21,8 @@ const upload = multer({ storage: storage });
 /**
  * @swagger
  * tags:
- * name: Files
- * description: The Files API
+ *   name: File
+ *   description: The Files API
  */
 
 /**

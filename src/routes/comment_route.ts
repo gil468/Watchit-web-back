@@ -6,8 +6,8 @@ import authMiddleware from "../common/auth_middleware";
 /**
  * @swagger
  * tags:
- * name: Comments
- * description: The Comments API
+ *   name: Comments
+ *   description: The Comments API
  */
 
 /**

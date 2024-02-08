@@ -4,8 +4,8 @@ import authController from "../controllers/auth_controller";
 /**
  * @swagger
  * tags:
- * name: Auth
- * description: The Authentication API
+ *     name: Auth
+ *     description: The Authentication API
  */
 
 /**

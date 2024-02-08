@@ -6,8 +6,8 @@ import authMiddleware from "../common/auth_middleware";
 /**
  * @swagger
  * tags:
- * name: User
- * description: The Files API
+ *   name: User
+ *   description: The Users API
  */
 
 /**

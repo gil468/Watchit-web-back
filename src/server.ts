@@ -17,7 +17,7 @@ initApp().then((app) => {
       },
       servers: [{ url: "http://localhost:3000" }],
     },
-    apis: ["../src/routes/*.ts", "../src/routes/auth_route.ts"],
+    apis: ["./**/*.ts"],
   };
   const specs = swaggerJsDoc(options);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
