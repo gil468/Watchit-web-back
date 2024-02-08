@@ -2,9 +2,10 @@ import express from "express";
 const router = express.Router();
 import multer from "multer";
 
-const base = `${process.env.NODE_ENV !== "production" ? "http" : "https"}://${
-  process.env.DOMAIN_BASE
-}:${process.env.PORT}/`;
+const base =
+  process.env.NODE_ENV !== "production"
+    ? `http://${process.env.DOMAIN_BASE}:${process.env.PORT}/`
+    : `https://${process.env.DOMAIN_BASE}/`;
 
 const storage = multer.diskStorage({
   destination: function (_req, _file, cb) {
