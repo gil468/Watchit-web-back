@@ -5,9 +5,10 @@ import { Express } from "express";
 import User, { IUser } from "../models/user_model";
 
 let app: Express;
-let accessTokenCookie = "";
 let refreshTokenCookie = "";
+let accessTokenCookie = "";
 let newRefreshTokenCookie = "";
+let newAccessTokenCookie = "";
 
 const user: IUser = {
   fullName: "John Doe",
@@ -29,7 +30,7 @@ afterAll(async () => {
 describe("Auth tests", () => {
   test("Test Register", async () => {
     const response = await request(app).post("/auth/register").send(user);
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(201);
   });
 
   test("Test Register exist email", async () => {
@@ -68,15 +69,16 @@ describe("Auth tests", () => {
   test("Test Login", async () => {
     const response = await request(app).post("/auth/login").send(user);
     expect(response.statusCode).toBe(200);
-    accessTokenCookie = response.headers["set-cookie"][1]
+    refreshTokenCookie = response.headers["set-cookie"][1]
       .split(",")
       .map((item) => item.split(";")[0])
       .join(";");
-    refreshTokenCookie = response.headers["set-cookie"][0]
+    accessTokenCookie = response.headers["set-cookie"][0]
       .split(",")
       .map((item) => item.split(";")[0])
       .join(";");
-    expect(accessTokenCookie).toBeDefined();
+
+    expect(refreshTokenCookie).toBeDefined();
   });
 
   test("Test forbidden access without token", async () => {
@@ -87,21 +89,22 @@ describe("Auth tests", () => {
   test("Test access with valid token", async () => {
     const response = await request(app)
       .get("/reviews/")
-      .set("Cookie", accessTokenCookie);
+      .set("Cookie", refreshTokenCookie);
     expect(response.statusCode).toBe(200);
   });
 
   test("Test access with invalid token", async () => {
     const response = await request(app)
       .get("/reviews/")
-      .set("Cookie", "1" + accessTokenCookie);
+      .set("Cookie", "1" + refreshTokenCookie);
     expect(response.statusCode).toBe(401);
   });
 
-  jest.setTimeout(12000);
-
+  jest.setTimeout(8000);
   test("Test access after timeout of token", async () => {
-    await new Promise((resolve) => setTimeout(() => resolve("done"), 12000));
+    process.env.JWT_EXPIRATION = "5s";
+    process.env.JWT_EXPIRATION_MILL = "5000";
+    await new Promise((resolve) => setTimeout(() => resolve("done"), 7000));
 
     const response = await request(app)
       .get("/reviews/")
@@ -112,14 +115,14 @@ describe("Auth tests", () => {
   test("Test refresh token", async () => {
     const response = await request(app)
       .get("/auth/refresh")
-      .set("Cookie", accessTokenCookie)
       .set("Cookie", refreshTokenCookie)
+      .set("Cookie", accessTokenCookie)
       .send();
     expect(response.statusCode).toBe(200);
-    expect(accessTokenCookie).toBeDefined();
     expect(refreshTokenCookie).toBeDefined();
+    expect(accessTokenCookie).toBeDefined();
 
-    const newAccessTokenCookie = response.headers["set-cookie"][1]
+    newAccessTokenCookie = response.headers["set-cookie"][1]
       .split(",")
       .map((item) => item.split(";")[0])
       .join(";");
@@ -137,21 +140,38 @@ describe("Auth tests", () => {
   test("Test double use of refresh token", async () => {
     const response = await request(app)
       .get("/auth/refresh")
-      .set("Cookie", refreshTokenCookie)
+      .set("Cookie", newRefreshTokenCookie)
       .send();
-    expect(response.statusCode).not.toBe(200);
+    newAccessTokenCookie = response.headers["set-cookie"][1]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
+    newRefreshTokenCookie = response.headers["set-cookie"][0]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
+    expect(response.statusCode).toBe(200);
 
     //verify that the new token is not valid as well
     const response1 = await request(app)
       .get("/auth/refresh")
       .set("Cookie", newRefreshTokenCookie)
       .send();
-    expect(response1.statusCode).not.toBe(200);
+    newAccessTokenCookie = response1.headers["set-cookie"][1]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
+    newRefreshTokenCookie = response1.headers["set-cookie"][0]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
+    expect(response1.statusCode).toBe(200);
   });
 
   test("Test Logout", async () => {
-    const response = await request(app).get("/auth/logout")
-    .set("Cookie", refreshTokenCookie)
+    const response = await request(app)
+      .get("/auth/logout")
+      .set("Cookie", newRefreshTokenCookie);
     expect(response.statusCode).toBe(200);
   });
 });
