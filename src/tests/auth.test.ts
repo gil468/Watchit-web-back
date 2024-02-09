@@ -5,6 +5,10 @@ import { Express } from "express";
 import User, { IUser } from "../models/user_model";
 
 let app: Express;
+let accessTokenCookie = "";
+let refreshTokenCookie = "";
+let newRefreshTokenCookie = "";
+
 const user: IUser = {
   fullName: "John Doe",
   email: "john@student.com",
@@ -21,10 +25,6 @@ beforeAll(async () => {
 afterAll(async () => {
   await mongoose.connection.close();
 });
-
-let accessToken: string;
-let refreshToken: string;
-let newRefreshToken: string;
 
 describe("Auth tests", () => {
   test("Test Register", async () => {
@@ -55,39 +55,28 @@ describe("Auth tests", () => {
     const response = await request(app).post("/auth/register").send({
       password: "123456",
     });
-    expect(response.statusCode).toBe(401);
+    expect(response.statusCode).toBe(400);
   });
 
   test("Test Register email incorrect", async () => {
     const response = await request(app).post("/auth/register").send({
       email: "john@t.com",
     });
-    expect(response.statusCode).toBe(401);
+    expect(response.statusCode).toBe(400);
   });
 
   test("Test Login", async () => {
     const response = await request(app).post("/auth/login").send(user);
     expect(response.statusCode).toBe(200);
-    // accessToken = response.body.accessToken;
-    // refreshToken = response.body.refreshToken;
-    const setCookieHeaders = response.headers["set-cookie"];
-
-    let accessToken;
-    for (let i = 0; i < setCookieHeaders.length; i++) {
-      const cookies = setCookieHeaders[i].split(';');
-      for (let j = 0; j < cookies.length; j++) {
-        const [cookieName, cookieValue] = cookies[j].split('=');
-        const trimmedCookieName = cookieName.trim();
-        if (trimmedCookieName === 'access') {
-          accessToken = cookieValue.trim();
-          break;
-        }
-      }
-      if (accessToken) {
-        break;
-      }
-    }
-    expect(accessToken).toBeDefined();
+    accessTokenCookie = response.headers["set-cookie"][1]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
+    refreshTokenCookie = response.headers["set-cookie"][0]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
+    expect(accessTokenCookie).toBeDefined();
   });
 
   test("Test forbidden access without token", async () => {
@@ -98,14 +87,14 @@ describe("Auth tests", () => {
   test("Test access with valid token", async () => {
     const response = await request(app)
       .get("/reviews/")
-      // .set("Authorization", "JWT " + accessToken);
+      .set("Cookie", accessTokenCookie);
     expect(response.statusCode).toBe(200);
   });
 
   test("Test access with invalid token", async () => {
     const response = await request(app)
       .get("/reviews/")
-      // .set("Authorization", "JWT 1" + accessToken);
+      .set("Cookie", "1" + accessTokenCookie);
     expect(response.statusCode).toBe(401);
   });
 
@@ -116,46 +105,53 @@ describe("Auth tests", () => {
 
     const response = await request(app)
       .get("/reviews/")
-      // .set("Authorization", "JWT " + accessToken);
+      .set("Cookie", accessTokenCookie);
     expect(response.statusCode).not.toBe(200);
   });
 
   test("Test refresh token", async () => {
     const response = await request(app)
       .get("/auth/refresh")
-      // .set("Authorization", "JWT " + refreshToken)
+      .set("Cookie", accessTokenCookie)
+      .set("Cookie", refreshTokenCookie)
       .send();
     expect(response.statusCode).toBe(200);
-    // expect(response.body.accessToken).toBeDefined();
-    // expect(response.body.refreshToken).toBeDefined();
+    expect(accessTokenCookie).toBeDefined();
+    expect(refreshTokenCookie).toBeDefined();
 
-    const newAccessToken = response.body.accessToken;
-    newRefreshToken = response.body.refreshToken;
+    const newAccessTokenCookie = response.headers["set-cookie"][1]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
+    newRefreshTokenCookie = response.headers["set-cookie"][0]
+      .split(",")
+      .map((item) => item.split(";")[0])
+      .join(";");
 
     const response2 = await request(app)
       .get("/reviews/")
-      // .set("Authorization", "JWT " + newAccessToken);
+      .set("Cookie", newAccessTokenCookie);
     expect(response2.statusCode).toBe(200);
   });
 
   test("Test double use of refresh token", async () => {
     const response = await request(app)
       .get("/auth/refresh")
-      // .set("Authorization", "JWT " + refreshToken)
+      .set("Cookie", refreshTokenCookie)
       .send();
     expect(response.statusCode).not.toBe(200);
 
     //verify that the new token is not valid as well
     const response1 = await request(app)
       .get("/auth/refresh")
-      // .set("Authorization", "JWT " + newRefreshToken)
+      .set("Cookie", newRefreshTokenCookie)
       .send();
     expect(response1.statusCode).not.toBe(200);
   });
 
   test("Test Logout", async () => {
-    const response = await request(app).get("/auth/logout");
-      // .set("Authorization", "JWT " + refreshToken);
+    const response = await request(app).get("/auth/logout")
+    .set("Cookie", refreshTokenCookie)
     expect(response.statusCode).toBe(200);
   });
 });

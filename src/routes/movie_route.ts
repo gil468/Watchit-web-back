@@ -12,6 +12,28 @@ import authMiddleware from "../common/auth_middleware";
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *      Movie:
+ *        type: object
+ *        properties:
+ *          movieId:
+ *            type: string
+ *            description: The movie Id
+ *          title:
+ *             type: string
+ *             description: The movie title
+ *          description:
+ *            type: string
+ *            description: The movie description
+ *        example:
+ *          movieId: '123456'
+ *          title: 'The Matrix'
+ *          description: 'A computer hacker learns about the true nature of his reality and his role in the war against its controllers.'
+ */
+
+/**
+ * @swagger
  * /movies/search/{search}:
  *   get:
  *     summary: Search for a movie
@@ -31,9 +53,7 @@ import authMiddleware from "../common/auth_middleware";
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Movie'
+ *               $ref: '#/components/schemas/Movie'
  *       401:
  *         description: Unauthorized, user needs to be signed in
  *       500:
@@ -67,7 +87,9 @@ router.get(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Movie'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Movie'
  *       401:
  *         description: Unauthorized, user needs to be signed in
  *       404:

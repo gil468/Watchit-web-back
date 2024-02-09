@@ -12,6 +12,32 @@ import authMiddleware from "../common/auth_middleware";
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *      Comment:
+ *        type: object
+ *        properties:
+ *          description:
+ *            type: string
+ *            description: The comment description
+ *          author:
+ *             type: string
+ *             description: The comment's author id
+ *          reviewId:
+ *            type: string
+ *            description: The comment reviewId
+ *          timeStamp:
+ *            type: string
+ *            description: The comment upload time
+ *        example:
+ *          description: 'This is a great movie'
+ *          author: '123456'
+ *          reviewId: '123456'
+ *          timeStamp: '2024-01-01T00:00:00.000Z'
+ */
+
+/**
+ * @swagger
  * /comments:
  *   post:
  *     summary: Create a new comment
@@ -23,12 +49,7 @@ import authMiddleware from "../common/auth_middleware";
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               postId:
- *                 type: string
- *               text:
- *                 type: string
+ *             $ref: '#/components/schemas/Comment'
  *     responses:
  *       200:
  *         description: The comment was successfully created

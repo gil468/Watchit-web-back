@@ -3,11 +3,10 @@ import initApp from "../app";
 import mongoose from "mongoose";
 import { Express } from "express";
 import User, { IUser } from "../models/user_model";
-import Review, { IReview } from "../models/review_model";
 
 let app: Express;
-let accessToken;
-let userId;
+let accessTokenCookie = "";
+let userId = "";
 
 const user: IUser = {
   fullName: "John Doe",
@@ -21,7 +20,10 @@ beforeAll(async () => {
   console.log("beforeAll");
   await User.deleteMany({ email: user.email });
   const response = await request(app).post("/auth/login").send(user);
-  accessToken = response.body.accessToken;
+  accessTokenCookie = response.headers["set-cookie"][1]
+    .split(",")
+    .map((item) => item.split(";")[0])
+    .join(";");
   userId = response.body._id;
 });
 
@@ -33,7 +35,8 @@ describe("Get connected user tests", () => {
     test('Should return 200 and the user data', async () => {
       const response = await request(app)
         .get('/users/connected')
-        .set('Cookie', [`access=${accessToken}`]);
+        .send(userId)
+        .set("Cookie", accessTokenCookie);
   
       expect(response.statusCode).toBe(200);
       expect(response.body).toHaveProperty('fullName');
@@ -53,8 +56,8 @@ describe("Get connected user tests", () => {
   
       const response = await request(app)
         .put(`/users/`)
-        .send(updatedUser)
-        .set('Cookie', [`access=${accessToken}`]);
+        .send(userId)
+        .set("Cookie", accessTokenCookie);
   
       expect(response.statusCode).toBe(200);
       expect(response.body).toHaveProperty('fullName', updatedUser.fullName);

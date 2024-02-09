@@ -12,6 +12,50 @@ import authMiddleware from "../common/auth_middleware";
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *      Review:
+ *        type: object
+ *        properties:
+ *          movieTitle:
+ *            type: string
+ *            description: The movie title
+ *          description:
+ *            type: string
+ *            description: The comment description
+ *          score:
+ *             type: Integer
+ *             description: The movie score by reviewr
+ *          reviewImgUrl:
+ *            type: string
+ *            description: The review Image Url
+ *          author:
+ *            type: string
+ *            description: The review user Id
+ *          timeStamp:
+ *            type: string
+ *            description: The review upload time
+ *          likes:
+ *            type: array
+ *            description: The review likes array
+ *          comments:
+ *            type: array
+ *            description: The review comments array
+ *          isLiked:
+ *            type: boolean
+ *            description: The review is liked by the connected user
+ *          likesCount:
+ *            type: number 
+ *            description: The review likes count
+ *        example:
+ *          description: 'This is a great movie'
+ *          author: '123456'
+ *          reviewId: '123456'
+ *          timeStamp: '2024-01-01T00:00:00.000Z'
+ */
+
+/**
+ * @swagger
  * /reviews:
  *   get:
  *     summary: Get all reviews

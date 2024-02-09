@@ -6,8 +6,9 @@ import User, { IUser } from "../models/user_model";
 import Review, { IReview } from "../models/review_model";
 
 let app: Express;
-let accessToken;
+let accessTokenCookie = "";
 let reviewId;
+
 const user: IUser = {
   fullName: "John Doe",
   email: "john@student.com",
@@ -32,9 +33,11 @@ beforeAll(async () => {
   await User.deleteMany({ email: user.email });
   const response = await request(app).post("/auth/register").send(user);
   user._id = response.body._id;
-  accessToken = response.headers["set-cookie"].find((cookie) =>
-    cookie.startsWith("access=")
-  );
+  accessTokenCookie = response.headers["set-cookie"][1]
+    .split(",")
+    .map((item) => item.split(";")[0])
+    .join(";");
+    console.log("accessTokenCookie", accessTokenCookie);
   review.author = user._id;
   const createdReview = await Review.create(review);
   reviewId = createdReview._id;
@@ -48,7 +51,7 @@ describe("Get reviews test", () => {
   test("Should return 200 and the list of reviews", async () => {
     const response = await request(app)
       .get("/reviews/")
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(200);
     expect(response.body).toBeInstanceOf(Array);
     expect(response.body[0]).toHaveProperty("movieTitle", review.movieTitle);
@@ -67,7 +70,7 @@ describe("Get review by id tests", () => {
   test("Should return 201 and the review", async () => {
     const response = await request(app)
       .get(`/reviews/${reviewId}`)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty("movieTitle", review.movieTitle);
     expect(response.body).toHaveProperty("description", review.description);
@@ -80,7 +83,7 @@ describe("Get review by id tests", () => {
   test("Should return 404 when review is not found", async () => {
     const response = await request(app)
       .get(`/reviews/60d6eb6b4d2f60001e680833`)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(404);
   });
 });
@@ -90,7 +93,7 @@ describe("Like review tests", () => {
     const response = await request(app)
       .post(`/reviews/like/${reviewId}`)
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty("message", "Liked");
   });
@@ -99,7 +102,7 @@ describe("Like review tests", () => {
     const response = await request(app)
       .post(`/reviews/like/${reviewId}`)
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(400);
     expect(response.body).toHaveProperty("message", "Already liked");
   });
@@ -108,7 +111,7 @@ describe("Like review tests", () => {
     const response = await request(app)
       .post(`/reviews/like/60d6eb6b4d2f60001e680833`)
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(404);
   });
 });
@@ -119,13 +122,13 @@ describe("Unlike review tests", () => {
     await request(app)
       .post(`/reviews/like/${reviewId}`)
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
 
     // Then, we can unlike it
     const response = await request(app)
       .post(`/reviews/unlike/${reviewId}`)
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty("message", "Unliked");
   });
@@ -134,7 +137,7 @@ describe("Unlike review tests", () => {
     const response = await request(app)
       .post(`/reviews/unlike/${reviewId}`)
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(400);
     expect(response.body).toHaveProperty("message", "Already unliked");
   });
@@ -143,7 +146,7 @@ describe("Unlike review tests", () => {
     const response = await request(app)
       .post(`/reviews/unlike/60d6eb6b4d2f60001e680833`)
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(404);
   });
 });
@@ -153,7 +156,7 @@ describe("Get reviews by connected user tests", () => {
     const response = await request(app)
       .get("/reviews/connectedUser")
       .send(user)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(200);
     expect(response.body).toBeInstanceOf(Array);
     expect(response.body[0]).toHaveProperty("movieTitle", review.movieTitle);
@@ -180,7 +183,7 @@ describe("Post review tests", () => {
     const response = await request(app)
       .post("/reviews")
       .send({ ...review, user })
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty("movieTitle", review.movieTitle);
     expect(response.body).toHaveProperty("description", review.description);
@@ -195,7 +198,7 @@ describe("Post review tests", () => {
     const response = await request(app)
       .post("/reviews")
       .send({})
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).not.toBe(201);
   });
 
@@ -213,7 +216,7 @@ describe("Put review by id tests", () => {
     const response = await request(app)
       .put(`/reviews/${reviewId}`)
       .send(updatedReview)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(200);
   });
 
@@ -221,7 +224,7 @@ describe("Put review by id tests", () => {
     const response = await request(app)
       .put(`/reviews/${reviewId}`)
       .send({})
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).not.toBe(200);
   });
 
@@ -236,7 +239,7 @@ describe("Put review by id tests", () => {
     const response = await request(app)
       .put(`/reviews/60d6eb6b4d2f60001e680833`)
       .send(review)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(404);
   });
 });
@@ -245,7 +248,7 @@ describe("Delete review by id tests", () => {
   test("Should return 200 when review is successfully deleted", async () => {
     const response = await request(app)
       .delete(`/reviews/${reviewId}`)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).toBe(200);
   });
 
@@ -257,7 +260,7 @@ describe("Delete review by id tests", () => {
   test("Should return 404 when review is not found", async () => {
     const response = await request(app)
       .delete(`/reviews/60d6eb6b4d2f60001e680833`)
-      .set("Cookie", [`access=${accessToken}`]);
+      .set("Cookie", accessTokenCookie)
     expect(response.statusCode).not.toBe(200);
   });
 });

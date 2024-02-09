@@ -12,6 +12,35 @@ import authMiddleware from "../common/auth_middleware";
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *      User:
+ *        type: object
+ *        required:
+ *          - email
+ *          - password
+ *        properties:
+ *          fullName:
+ *            type: string
+ *            description: The user full name
+ *          email:
+ *             type: string
+ *             description: The user email
+ *          password:
+ *            type: string
+ *            description: The user password
+ *          imgUrl:
+ *            type: string
+ *            description: The user profile image url
+ *        example:
+ *          fullName: 'Bob Smith'
+ *          email: 'bob@gmail.com'
+ *          password: '123456'
+ *          imgUrl: 'https://www.google.com/image.png'
+ */
+
+/**
+ * @swagger
  * /user/connected:
  *   get:
  *     summary: Get connected user

@@ -7,30 +7,14 @@ import User, { IUser } from "../models/user_model";
 import Review, { IReview } from "../models/review_model";
 
 let app: Express;
+let accessTokenCookie = "";
+
 const user: IUser = {
   fullName: "John Doe",
   email: "john@student.com",
   password: "1234567890",
   imgUrl: "https://www.google.com",
 };
-let accessTokenCookie = "";
-
-beforeAll(async () => {
-  app = await initApp();
-  console.log("beforeAll");
-
-  await User.deleteMany({ email: user.email });
-  const response = await request(app).post("/auth/register").send(user);
-  user._id = response.body._id;
-  accessTokenCookie = response.headers["set-cookie"][1]
-    .split(",")
-    .map((item) => item.split(";")[0])
-    .join(";");
-});
-
-afterAll(async () => {
-  await mongoose.connection.close();
-});
 
 const review: IReview = {
   movieTitle: "test movie",
@@ -49,6 +33,26 @@ const comment: IComment = {
   reviewId: review._id,
   timeStamp: new Date(),
 };
+
+beforeAll(async () => {
+  app = await initApp();
+  console.log("beforeAll");
+
+  await User.deleteMany({ email: user.email });
+  const response = await request(app).post("/auth/register").send(user);
+  user._id = response.body._id;
+  accessTokenCookie = response.headers["set-cookie"][1];
+  // .split(",")
+  // .map((item) => item.split(";")[0])
+  // .join(";");
+  console.log(response.headers["set-cookie"]);
+  review.author = user._id;
+  await Review.create(review);
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
+});
 
 describe("Post comment test", () => {
   const addComment = async (comment: IComment) => {
