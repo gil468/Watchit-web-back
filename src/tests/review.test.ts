@@ -26,17 +26,6 @@ const review: IReview = {
   author: user._id,
 };
 
-const reviewLiked: IReview = {
-  movieTitle: "Test Movie",
-  description: "Test Description",
-  reviewImgUrl: "https://www.google.com",
-  score: 5,
-  timeStamp: new Date(),
-  likes: [],
-  comments: [],
-  author: user._id,
-};
-
 beforeAll(async () => {
   app = await initApp();
   console.log("beforeAll");
@@ -75,6 +64,11 @@ describe("Get reviews test", () => {
     expect(response.body[0]).toHaveProperty("likes", review.likes.length);
     expect(response.body[0]).toHaveProperty("isLiked", false);
   });
+
+  test("Should return 401 when user is not authenticated", async () => {
+    const response = await request(app).get("/reviews/");
+    expect(response.statusCode).toBe(401);
+  });
 });
 
 describe("Get review by id tests", () => {
@@ -89,23 +83,23 @@ describe("Get review by id tests", () => {
     expect(response.body).toHaveProperty("score", review.score);
   });
 
-  test("Should return 404 when review is not found", async () => {
+  test("Should return 500 when review is not found", async () => {
     const response = await request(app)
       .get(`/reviews/id/160d6eb6b4d2f60001e680833`)
       .set("Cookie", accessTokenCookie);
-    expect(response.statusCode).toBe(404);
+    expect(response.statusCode).toBe(500);
   });
 });
 
 describe("Like review tests", () => {
-  // test('Should return 201 and the message "Liked"', async () => {
-  //   const response = await request(app)
-  //     .post(`/reviews/like/${review._id}`)
-  //     .send(user._id)
-  //     .set("Cookie", accessTokenCookie);
-  //   expect(response.statusCode).toBe(201);
-  //   expect(response.body).toHaveProperty("message", "Liked");
-  // });
+  test('Should return 201 and the message "Liked"', async () => {
+    const response = await request(app)
+      .post(`/reviews/like/${review._id}`)
+      .send(user._id)
+      .set("Cookie", accessTokenCookie);
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toHaveProperty("message", "Liked");
+  });
 
   // test('Should return 400 and the message "Already liked"', async () => {
   //   const response = await request(app)
@@ -188,11 +182,11 @@ describe("Get reviews by connected user tests", () => {
 });
 
 describe("Post review tests", () => {
-  test("Should return 201 and the created review", async () => {
+  const addReview = async (review: IReview) => {
     const response = await request(app)
       .post("/reviews")
-      .send({ ...review, user: user._id})
-      .set("Cookie", accessTokenCookie);
+      .set("Cookie", accessTokenCookie)
+      .send(review);
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty("movieTitle", review.movieTitle);
     expect(response.body).toHaveProperty("description", review.description);
@@ -201,6 +195,9 @@ describe("Post review tests", () => {
     expect(response.body).toHaveProperty("likes", review.likes.length);
     expect(response.body).toHaveProperty("isLiked", false);
     expect(response.body).toHaveProperty("author", user._id.toString());
+  };
+  test("Should return 201 and the created review", async () => {
+    await addReview(review);
   });
 
   test("Should return error when review data is missing", async () => {

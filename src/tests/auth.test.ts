@@ -168,6 +168,13 @@ describe("Auth tests", () => {
     expect(response1.statusCode).toBe(200);
   });
 
+  test("User isn't authenticated and request refresh token", async () => {
+    const response = await request(app)
+      .get("/auth/refresh")
+      .send();
+    expect(response.statusCode).toBe(401);
+  });
+
   test("Test Logout", async () => {
     const response = await request(app)
       .get("/auth/logout")
