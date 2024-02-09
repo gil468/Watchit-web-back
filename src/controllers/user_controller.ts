@@ -25,12 +25,16 @@ class UserController extends BaseController<IUser> {
   }
 
   async putById(req: AuthRequest, res: Response) {
-    console.log("Put User");
+    console.log("Put User", req.body);
     const id = req.user._id;
 
     try {
-      const obj = await this.model.findByIdAndUpdate(id, req.body);
-      res.status(200).send(obj);
+      const updatedUser = await this.model.findByIdAndUpdate(id, req.body, {
+        new: true,
+      });
+      const { password, refreshTokens, ...updatedUserWithoutPassword } =
+        updatedUser.toObject();
+      res.status(200).send(updatedUserWithoutPassword);
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
