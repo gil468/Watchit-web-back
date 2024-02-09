@@ -1,7 +1,7 @@
 import { Express } from "express";
 import request from "supertest";
 import initApp from "../app";
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import Comment, { IComment } from "../models/comment_model";
 import User, { IUser } from "../models/user_model";
 import Review, { IReview } from "../models/review_model";
@@ -40,14 +40,17 @@ beforeAll(async () => {
 
   await User.deleteMany({ email: user.email });
   const response = await request(app).post("/auth/register").send(user);
-  user._id = response.body._id;
   accessTokenCookie = response.headers["set-cookie"][1]
-  .split(",")
-  .map((item) => item.split(";")[0])
-  .join(";");
-  review.author = user._id;
-  comment.author = user._id;
-  await Review.create(review);
+    .split(",")
+    .map((item) => item.split(";")[0])
+    .join(";");
+  const postedUser = await User.findOne({ email: user.email });
+  user._id = postedUser.id;
+  review.author = postedUser.id;
+  comment.author = postedUser.id;
+  const postedReview = await Review.create(review);
+  review._id = postedReview._id;
+  comment.reviewId = postedReview._id;
 });
 
 afterAll(async () => {
@@ -60,10 +63,11 @@ describe("Post comment test", () => {
       .post("/comments/")
       .set("Cookie", accessTokenCookie)
       .send(comment);
+    console.log(response.body);
     expect(response.statusCode).toBe(201);
     expect(response.body.author).toBe(user._id);
     expect(response.body.description).toBe(comment.description);
-    expect(response.body.reviewId).toBe(review._id);
+    expect(response.body.reviewId).toBe(review._id.toString());
   };
 
   test("Post comment test", async () => {

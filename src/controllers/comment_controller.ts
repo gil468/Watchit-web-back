@@ -17,6 +17,7 @@ class CommentController extends BaseController<IComment> {
       const review = await Review.findById(reviewId);
       if (!review) {
         res.status(404).json({ message: "Review not found" });
+        return;
       }
 
       const comment = await Comment.create({
@@ -28,9 +29,8 @@ class CommentController extends BaseController<IComment> {
       review.comments.push(comment.id);
 
       await review.save();
-      res.status(201).json({ message: "Comment created successfully" });
+      res.status(201).json(comment);
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: "Internal Server Error" });
     }
   }

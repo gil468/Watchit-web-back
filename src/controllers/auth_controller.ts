@@ -82,7 +82,12 @@ const register = async (req: Request, res: Response) => {
       httpOnly: true,
       maxAge: accessTokenExpiration,
     });
-    return res.sendStatus(200);
+    const {
+      password: userPassword,
+      refreshTokens,
+      ...userWithoutPassword
+    } = user.toObject();
+    return res.status(201).json(userWithoutPassword);
   } catch (err) {
     return res.status(400).send("error missing email or password");
   }
