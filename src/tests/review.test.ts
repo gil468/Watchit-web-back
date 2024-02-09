@@ -94,21 +94,19 @@ describe("Get review by id tests", () => {
 describe("Like review tests", () => {
   test('Should return 201 and the message "Liked"', async () => {
     const response = await request(app)
-      .post(`/reviews/like/${review._id}`)
-      .send(user._id)
+      .get(`/reviews/like/${review._id}`)
       .set("Cookie", accessTokenCookie);
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty("message", "Liked");
   });
 
-  // test('Should return 400 and the message "Already liked"', async () => {
-  //   const response = await request(app)
-  //     .post(`/reviews/like/${reviewLiked._id}`)
-  //     .send(user)
-  //     .set("Cookie", accessTokenCookie);
-  //   expect(response.statusCode).toBe(400);
-  //   expect(response.body).toHaveProperty("message", "Already liked");
-  // });
+  test('Should return 400 and the message "Already liked"', async () => {
+    const response = await request(app)
+      .get(`/reviews/like/${review._id}`)
+      .set("Cookie", accessTokenCookie);
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty("message", "Already liked");
+  });
 
   test("Should return 404 when review is not found", async () => {
     const response = await request(app)
@@ -120,30 +118,28 @@ describe("Like review tests", () => {
 });
 
 describe("Unlike review tests", () => {
-  // test('Should return 201 and the message "Unliked"', async () => {
-  //   // First, we need to like the review
-  //   await request(app)
-  //     .post(`/reviews/like/${review._id}`)
-  //     .send(user)
-  //     .set("Cookie", accessTokenCookie);
+  test('Should return 201 and the message "Unliked"', async () => {
+    // First, we need to like the review
+    await request(app)
+      .get(`/reviews/like/${review._id}`)
+      .send(user)
+      .set("Cookie", accessTokenCookie);
 
-  //   // Then, we can unlike it
-  //   const response = await request(app)
-  //     .post(`/reviews/unlike/${review._id}`)
-  //     .send(user)
-  //     .set("Cookie", accessTokenCookie);
-  //   expect(response.statusCode).toBe(201);
-  //   expect(response.body).toHaveProperty("message", "Unliked");
-  // });
+    // Then, we can unlike it
+    const response = await request(app)
+      .get(`/reviews/unlike/${review._id}`)
+      .set("Cookie", accessTokenCookie);
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toHaveProperty("message", "Unliked");
+  });
 
-  // test('Should return 400 and the message "Already unliked"', async () => {
-  //   const response = await request(app)
-  //     .post(`/reviews/unlike/${review._id}`)
-  //     .send(user)
-  //     .set("Cookie", accessTokenCookie);
-  //   expect(response.statusCode).toBe(400);
-  //   expect(response.body).toHaveProperty("message", "Already unliked");
-  // });
+  test('Should return 400 and the message "Already unliked"', async () => {
+    const response = await request(app)
+      .get(`/reviews/unlike/${review._id}`)
+      .set("Cookie", accessTokenCookie);
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty("message", "Already unliked");
+  });
 
   test("Should return 404 when review is not found", async () => {
     const response = await request(app)
@@ -183,17 +179,18 @@ describe("Get reviews by connected user tests", () => {
 
 describe("Post review tests", () => {
   const addReview = async (review: IReview) => {
+    console.log("Add Review: ", review);
+    const { _id, ...reviewWithNoId } = review;
     const response = await request(app)
       .post("/reviews")
-      .set("Cookie", accessTokenCookie)
-      .send(review);
+      .send(reviewWithNoId)
+      .set("Cookie", accessTokenCookie);
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty("movieTitle", review.movieTitle);
     expect(response.body).toHaveProperty("description", review.description);
     expect(response.body).toHaveProperty("reviewImgUrl", review.reviewImgUrl);
     expect(response.body).toHaveProperty("score", review.score);
-    expect(response.body).toHaveProperty("likes", review.likes.length);
-    expect(response.body).toHaveProperty("isLiked", false);
+    expect(response.body).toHaveProperty("likes", review.likes);
     expect(response.body).toHaveProperty("author", user._id.toString());
   };
   test("Should return 201 and the created review", async () => {

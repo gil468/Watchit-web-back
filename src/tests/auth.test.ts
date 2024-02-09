@@ -169,9 +169,7 @@ describe("Auth tests", () => {
   });
 
   test("User isn't authenticated and request refresh token", async () => {
-    const response = await request(app)
-      .get("/auth/refresh")
-      .send();
+    const response = await request(app).get("/auth/refresh").send();
     expect(response.statusCode).toBe(401);
   });
 
