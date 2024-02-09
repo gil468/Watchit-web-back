@@ -58,7 +58,6 @@ describe("Update user tests", () => {
       .send(updatedUser)
       .set("Cookie", accessTokenCookie);
 
-    console.log("boduyy", response.body);
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("fullName", updatedUser.fullName);
     expect(response.body).toHaveProperty("email", updatedUser.email);
