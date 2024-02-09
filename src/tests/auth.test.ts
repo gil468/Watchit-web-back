@@ -98,10 +98,10 @@ describe("Auth tests", () => {
     expect(response.statusCode).toBe(401);
   });
 
-  jest.setTimeout(10000);
+  jest.setTimeout(12000);
 
   test("Test access after timeout of token", async () => {
-    await new Promise((resolve) => setTimeout(() => resolve("done"), 5000));
+    await new Promise((resolve) => setTimeout(() => resolve("done"), 12000));
 
     const response = await request(app)
       .get("/reviews/")

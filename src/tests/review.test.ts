@@ -24,7 +24,7 @@ const review: IReview = {
   timeStamp: new Date(),
   likes: [],
   comments: [],
-  author: null,
+  author: user._id,
 };
 
 beforeAll(async () => {

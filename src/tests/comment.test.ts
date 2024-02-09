@@ -17,14 +17,14 @@ const user: IUser = {
 };
 
 const review: IReview = {
-  movieTitle: "test movie",
-  description: "test description",
-  score: 4,
+  movieTitle: "Test Movie",
+  description: "Test Description",
   reviewImgUrl: "https://www.google.com",
-  author: user._id,
+  score: 5,
   timeStamp: new Date(),
   likes: [],
   comments: [],
+  author: user._id,
 };
 
 const comment: IComment = {
@@ -41,12 +41,12 @@ beforeAll(async () => {
   await User.deleteMany({ email: user.email });
   const response = await request(app).post("/auth/register").send(user);
   user._id = response.body._id;
-  accessTokenCookie = response.headers["set-cookie"][1];
-  // .split(",")
-  // .map((item) => item.split(";")[0])
-  // .join(";");
-  console.log(response.headers["set-cookie"]);
+  accessTokenCookie = response.headers["set-cookie"][1]
+  .split(",")
+  .map((item) => item.split(";")[0])
+  .join(";");
   review.author = user._id;
+  comment.author = user._id;
   await Review.create(review);
 });
 
